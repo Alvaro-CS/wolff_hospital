@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package wolff_hosptal;
+package wolff_hospital;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -15,7 +15,7 @@ import javafx.stage.Stage;
  *
  * @author ALVARO
  */
-public class Wolff_hosptal extends Application {
+public class Wolff_hospital extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
