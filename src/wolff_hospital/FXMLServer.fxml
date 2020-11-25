@@ -8,14 +8,15 @@
 
 <AnchorPane id="AnchorPane" prefHeight="200" prefWidth="387.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wolff_hospital.FXMLServerController">
     <children>
-        <Button fx:id="button" layoutX="61.0" layoutY="81.0" onAction="#handleOpenServer" text="Open server" />
-        <Label fx:id="label1" layoutX="226.0" layoutY="114.0" minHeight="16" minWidth="69" />
-      <Button fx:id="button1" layoutX="61.0" layoutY="141.0"  text="Close server" />
-      <Label layoutX="19.0" layoutY="36.0" text="Welcome back hospital server admin!">
+        <Button fx:id="button" layoutX="164.0" layoutY="87.0" onAction="#handleOpenServer" text="Open server" />
+        <Label fx:id="label1" layoutX="329.0" layoutY="120.0" minHeight="16" minWidth="69" />
+      <Button fx:id="button1" layoutX="164.0" layoutY="147.0" onAction="#handleCloseServer" text="Close server" />
+      <Label layoutX="122.0" layoutY="42.0" text="Welcome back hospital server admin!">
          <font>
             <Font name="Georgia Bold" size="18.0" />
          </font>
       </Label>
-      <Pane fx:id="ECGchart" layoutX="14.0" layoutY="191.0" prefHeight="200.0" prefWidth="364.0" />
+      <Pane fx:id="ECGpane" layoutX="14.0" layoutY="191.0" prefHeight="354.0" prefWidth="564.0" />
+      <Button layoutX="329.0" layoutY="147.0" mnemonicParsing="false" onAction="#showECG" text="Show ECG" />
     </children>
 </AnchorPane>

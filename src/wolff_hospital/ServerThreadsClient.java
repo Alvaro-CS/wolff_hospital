@@ -8,6 +8,7 @@ package wolff_hospital;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import static java.lang.System.exit;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -19,10 +20,13 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Pane;
 
 public class ServerThreadsClient implements Runnable {
-    ServerSocket serverSocket;
 
+    ServerSocket serverSocket;
+    private int[] ecg_data;
+    boolean open=true;
     public ServerThreadsClient() {
     }
+
     public ServerThreadsClient(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
     }
@@ -30,22 +34,24 @@ public class ServerThreadsClient implements Runnable {
     @Override
     public void run() {
         try {
-            serverSocket= new ServerSocket(9000);
-            
-            while(true){
+            serverSocket = new ServerSocket(9000);
+
+            while (open) {
                 try {
+                    System.out.println("Antes accept");
                     Socket socket = serverSocket.accept();
-                    
+                    System.out.println("Despues accept");
                     InputStream inputStream = null;
                     ObjectInputStream objectInputStream = null;
-                    
+
                     try {
                         inputStream = socket.getInputStream();
                         objectInputStream = new ObjectInputStream(inputStream);
                         Object tmp;
-                        while ((tmp = objectInputStream.readObject()) != null) {
-                            int[] ecg_data = (int[]) tmp;
-                            showECG(ecg_data);
+                        System.out.println("Antes leer");
+                        while ((tmp = objectInputStream.readObject()) != null) {//we receive the ecg
+                            System.out.println("dentro");
+                            ecg_data = (int[]) tmp;
                         }
                     } catch (IOException | ClassNotFoundException e) {
                         System.out.println("Client closed");
@@ -56,45 +62,13 @@ public class ServerThreadsClient implements Runnable {
                     Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+           // if(!open)                        {releaseResourcesClient(objectInputStream, socket);}
+
         } catch (IOException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-@FXML
-Pane paneChart;
-    public void showECG(int[] ECG_data) {
-        XYChart.Series series = new XYChart.Series();
 
-        //populating the series with data
-        int min = Integer.MAX_VALUE;
-        int max = 0;
-        for (int i = 0; i < ECG_data.length; i++) {
-            series.getData().add(new XYChart.Data(i, ECG_data[i]));
-            if (min > ECG_data[i]) {
-                min = ECG_data[i];
-            }
-            if (max < ECG_data[i]) {
-                max = ECG_data[i];
-            }
-        }
-
-        paneChart.getChildren().clear();
-
-        final NumberAxis xAxis = new NumberAxis(0, ECG_data.length, 1);
-        final NumberAxis yAxis = new NumberAxis(min - 5, max + 5, 0.1);//lower, upper, tick
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-
-        lineChart.getXAxis().setLabel("Time");
-        lineChart.getYAxis().setLabel("Amplitude");
-
-        //creating the chart
-        lineChart.setTitle("ECG");
-        //defining a series
-        lineChart.getData().add(series);
-        paneChart.getChildren().add(lineChart);
-        System.out.println("Shown");
-    }
     private static void releaseResourcesClient(ObjectInputStream objectInputStream, Socket socket) {
         try {
             objectInputStream.close();
@@ -108,4 +82,20 @@ Pane paneChart;
             Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public void closeServer() {
+        try {
+            open=false;
+            serverSocket.close();
+            exit(0);
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public int[] getEcg_data() {
+        return ecg_data;
+    }
+
 }
