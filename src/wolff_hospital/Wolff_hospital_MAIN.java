@@ -15,7 +15,7 @@ import javafx.stage.Stage;
  *
  * @author ALVARO
  */
-public class Wolff_hospital extends Application {
+public class Wolff_hospital_MAIN extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {

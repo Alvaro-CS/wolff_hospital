@@ -32,37 +32,25 @@ public class FXMLServerController implements Initializable {
 
     @FXML
     private Label label1;
-    ServerSocket serverSocket = null;
+   // ServerSocket serverSocket = null;
     private boolean open = false;
 
     @FXML
     private void handleOpenServer(ActionEvent event) {
         if (!open) {
-            try {
+            //try {
                 //Create a service that is waiting in port 9000
-                serverSocket = new ServerSocket(9000);
+              //  serverSocket = new ServerSocket(9000);
                 label1.setText("Server opened!");
                 open = true;
-                //Thie executes when we have a client
-                while (true) {
-                    Socket socket = serverSocket.accept();//se queda trabado aquí
-                    System.out.println("Linea");
-                    //Read from the client
-                    InputStream inputStream = socket.getInputStream();
-                    ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-                    try {
-                        Object tmp;
-                        while ((tmp = objectInputStream.readObject()) != null) {
-                            int[] ecg_data = (int[]) tmp;
-                            showECG(ecg_data);
-                        }
-                    } catch (IOException | ClassNotFoundException e) {
-                        System.out.println("Client closed");
-                    }
-                }
-            } catch (IOException ex) {
+                //We execute a thread that will wait for clients, so UI continous working.
+                new Thread(new ServerThreadsClient()).start();
+                //Read from the client
+           /* } catch (IOException ex) {
                 Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            } finally {
+                releaseResourcesServer(serverSocket);
+            }*/
         } else {
             label1.setText("Server is already opened!");
 
@@ -82,7 +70,7 @@ public class FXMLServerController implements Initializable {
         }
     }
 
-    @FXML
+  /*  @FXML
     private void handleCloseServer(ActionEvent event) {
         if (open) {
             label1.setText("Server closed!");
@@ -95,23 +83,18 @@ public class FXMLServerController implements Initializable {
             label1.setText("Server is already closed!");
 
         }
-    }
+    }*/
 
-    private static void releaseResources(ObjectInputStream objectInputStream, Socket socket, ServerSocket serverSocket) {
-        try {
-            objectInputStream.close();
-        } catch (IOException ex) {
-        }
-        try {
-            socket.close();
-        } catch (IOException ex) {
-        }
+    private static void releaseResourcesServer(ServerSocket serverSocket) {
         try {
             serverSocket.close();
         } catch (IOException ex) {
+            Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
+
         }
     }
-    Pane paneChart;
+
+    /*    Pane paneChart;
 
     @FXML
     public void showECG(int[] ECG_data) {
@@ -145,8 +128,7 @@ public class FXMLServerController implements Initializable {
         lineChart.getData().add(series);
         paneChart.getChildren().add(lineChart);
         System.out.println("Shown");
-    }
-
+    }*/
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
