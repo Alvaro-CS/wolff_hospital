@@ -35,6 +35,10 @@ public class FXMLServerController implements Initializable {
    // ServerSocket serverSocket = null;
     private boolean open = false;
     private ServerThreadsClient serverThreadsClient; //we create a reference for accesing different methods
+    
+    /**
+     *This method creates the server thread. It will start waiting for clients.
+     */
     @FXML
     private void handleOpenServer(ActionEvent event) {
         if (!open) {
@@ -62,7 +66,9 @@ public class FXMLServerController implements Initializable {
         } catch (IOException ex) {
         }
     }
-
+    /**
+     *This method closes the server thread.
+     */
     @FXML
     private void handleCloseServer(ActionEvent event) {
         if (open) {
@@ -78,6 +84,10 @@ public class FXMLServerController implements Initializable {
     @FXML
     Pane ECGpane;
 
+    /**
+     *This method gets the data received by the server (int[]) and shows it in
+     * the server, inside a pane.
+     */
     @FXML
     public void showECG() {
         int[] ECG_data=serverThreadsClient.getEcg_data();

@@ -19,18 +19,26 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Pane;
 
+/**
+ *
+ * @author ALVARO
+ */
 public class ServerThreadsClient implements Runnable {
 
     ServerSocket serverSocket;
     private int[] ecg_data;
     boolean open=true;
+
+    /**
+     *Empty (default) constructor.
+     */
     public ServerThreadsClient() {
     }
 
-    public ServerThreadsClient(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
-    }
-
+    /**
+     *Run method for the server, which waits for a client to connect, and when
+     * it does, receives the ECG that has been sent.
+     */
     @Override
     public void run() {
         try {
@@ -83,6 +91,9 @@ public class ServerThreadsClient implements Runnable {
         }
     }
 
+    /**
+     *Method that closes the serversocket and exits the thread, thus the server.
+     */
     public void closeServer() {
         try {
             open=false;
@@ -94,6 +105,10 @@ public class ServerThreadsClient implements Runnable {
 
     }
 
+    /**
+     *Returns ECG data for managing the data from the ServerController.
+     * @return ECG_data that the server has received.
+     */
     public int[] getEcg_data() {
         return ecg_data;
     }
