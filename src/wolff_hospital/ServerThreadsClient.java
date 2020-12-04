@@ -6,7 +6,9 @@
 package wolff_hospital;
 
 import POJOS.Patient;
+import POJOS.Patient_list;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,7 +40,7 @@ public class ServerThreadsClient implements Runnable {
     boolean open = true;
 
     // private static ArrayList<Patient> patients = new ArrayList<>();
-    private static String filename = "patientList";
+    private static String filename = "./files/patientData";
 
     /**
      * Empty (default) constructor.
@@ -77,10 +79,11 @@ public class ServerThreadsClient implements Runnable {
                         switch (instruction) {
                             case "REGISTER": {
                                 System.out.println(instruction + " option running");
-                                Patient p = null;
-                                while ((tmp = objectInputStream.readObject()) != null) {//we receive the patient
-                                    p = (Patient) tmp;
-                                }
+
+                                tmp = objectInputStream.readObject();//we receive the new patient from client
+                                Patient p = (Patient) tmp;
+
+                                System.out.println("Patient received:" + p.getDNI());
                                 registerPatient(p);
                                 break;
                             }
@@ -89,13 +92,15 @@ public class ServerThreadsClient implements Runnable {
 
                                 String[] data = new String[2];
                                 int i = 0;
-                                while ((tmp = objectInputStream.readObject()) != null) {//we receive the DNI+password combination
+                                /*while ((tmp = objectInputStream.readObject()) != null) {//we receive the DNI+password combination
                                     data[i] = (String) tmp;
                                     System.out.println(data[i]);
                                     i++;
-                                }
+                                }*/
+                                data[0]=(String)objectInputStream.readObject();
+                                data[1]=(String)objectInputStream.readObject();
                                 searchPatient(data);
-                                //
+                                
                                 break;
                             }
                             default: {
@@ -105,6 +110,8 @@ public class ServerThreadsClient implements Runnable {
                         }
 
                     } catch (IOException | ClassNotFoundException e) {
+                        Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
+
                         System.out.println("Client closed");
                     } finally {
                         releaseResourcesClient(objectInputStream, socket);
@@ -123,11 +130,17 @@ public class ServerThreadsClient implements Runnable {
 
     private static void registerPatient(Patient p) throws ClassNotFoundException {
         try {
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(filename));
+            System.out.println("Getting old patients...");
             ArrayList<Patient> patients = getPatients();
-
+            System.out.println("Actual patients:\n" + patients);
             patients.add(p); //we add the patient to the list of patients
-            os.writeObject(patients); //TODO how do we write only dni and passw? 2 different files?
+            System.out.println(p + " added.");
+            System.out.println("Updated patients:\n" + patients);
+            Patient_list patient_list = new Patient_list(patients);
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(filename));
+
+            os.writeObject(patient_list); //TODO how do we write only dni and passw? 2 different files?
+            System.out.println("All patients saved into file.");
             os.close();
 
         } catch (FileNotFoundException ex) {
@@ -140,20 +153,21 @@ public class ServerThreadsClient implements Runnable {
 
     private static void searchPatient(String[] data) {
         Patient patient = null;
-        String filename = "patientFiles";
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
+            System.out.println("Before taking patients");
             ArrayList<Patient> patients = getPatients();//method to return all patients
+            System.out.println("Actual patients:\n" + patients);
             for (int i = 0; i < patients.size(); i++) {
                 if (patients.get(i).getDNI().equalsIgnoreCase(data[0])
                         && patients.get(i).getPassword().equals(data[1])) {
                     patient = patients.get(i);
-                    System.out.println("Patient found.");
+                    System.out.println("Patient found:" + patient.getDNI());
                 }
             }
             is.close();
             //Send patient object to client
-            sendPatient(patient);
+            sendPatientToClient(patient);
 
         } catch (EOFException ex) {
             System.out.println("All data have been correctly read.");
@@ -167,43 +181,48 @@ public class ServerThreadsClient implements Runnable {
         }
     }
 
-    private static ArrayList<Patient> getPatients() throws ClassNotFoundException {
-        ArrayList<Patient> patients = null;
-        ObjectInputStream is;
+    private static ArrayList<Patient> getPatients() throws ClassNotFoundException, FileNotFoundException {
+        ArrayList<Patient> patients = new ArrayList<>();
+        ObjectInputStream is = null;
         try {
             is = new ObjectInputStream(new FileInputStream(filename));
-            patients = (ArrayList<Patient>) is.readObject();
-            for (int i = 0; i < patients.size(); i++) {
-                System.out.println(patients.get(i).toString());
+            System.out.println(filename);
+            Patient_list patient_list = (Patient_list) is.readObject();
+            patients = patient_list.getPatients();
+            System.out.println(patients);
+
+        }  catch (IOException ex) {
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
             }
-            is.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         return patients;
     }
 
-    private static void sendPatient(Patient patient) {
+    private static void sendPatientToClient(Patient patient) {
         OutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
         Socket socket = null;
         try {
-            socket = new Socket("localhost", 9000);
+            socket = new Socket("localhost", 9001);
             outputStream = socket.getOutputStream();
             objectOutputStream = new ObjectOutputStream(outputStream);
-            //TODO
-            /*
+
             //Sending order
-            String order="REGISTER";
+            String order = "RECEIVE_PATIENT";
             objectOutputStream.writeObject(order);
-            System.out.println("Order"+ order+ "sent");
-            
+            System.out.println("Order" + order + "sent");
+
             //Sending patient
             objectOutputStream.writeObject(patient);
             System.out.println("Patient data sent to client");
-             */
+
         } catch (IOException ex) {
             System.out.println("Unable to write the object on the server.");
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -230,13 +249,13 @@ public class ServerThreadsClient implements Runnable {
         try {
             objectInputStream.close();
         } catch (IOException ex) {
-            Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         try {
             socket.close();
         } catch (IOException ex) {
-            Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
