@@ -34,6 +34,7 @@ public class Patient implements Runnable, Serializable {
         this.password = password;
         this.name = name;
         this.lastName = lastName;
+        clinical_record_list= new ArrayList<>();
     }
 
     //getters
@@ -67,6 +68,14 @@ public class Patient implements Runnable, Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public ArrayList<Clinical_record> getClinical_record_list() {
+        return clinical_record_list;
+    }
+
+    public void setClinical_record_list(ArrayList<Clinical_record> clinical_record_list) {
+        this.clinical_record_list = clinical_record_list;
     }
 
     @Override
