@@ -97,10 +97,20 @@ public class ServerThreadsClient implements Runnable {
                                     System.out.println(data[i]);
                                     i++;
                                 }*/
-                                data[0]=(String)objectInputStream.readObject();
-                                data[1]=(String)objectInputStream.readObject();
+                                data[0] = (String) objectInputStream.readObject();
+                                data[1] = (String) objectInputStream.readObject();
                                 searchPatient(data);
-                                
+
+                                break;
+                            }
+                            case "UPDATE": {
+                                System.out.println(instruction + " option running");
+
+                                tmp = objectInputStream.readObject();//we receive the new patient from client
+                                Patient p = (Patient) tmp;
+
+                                System.out.println("Patient received:" + p.getDNI());
+                                removePatient(p);
                                 break;
                             }
                             default: {
@@ -181,6 +191,33 @@ public class ServerThreadsClient implements Runnable {
         }
     }
 
+    //Return patient for update (use)
+    private static Patient searchPatientID(String id) {
+        Patient patient = null;
+        try {
+            ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
+            System.out.println("Before taking patients");
+            ArrayList<Patient> patients = getPatients();//method to return all patients
+            System.out.println("Actual patients:\n" + patients);
+            for (int i = 0; i < patients.size(); i++) {
+                if (patients.get(i).getDNI().equalsIgnoreCase(id)) {
+                    patient = patients.get(i);
+                    System.out.println("Patient found:" + patient.getDNI());
+                }
+            }
+            is.close();
+
+        } catch (EOFException ex) {
+            System.out.println("All data have been correctly read.");
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return patient;
+    }
+
     private static ArrayList<Patient> getPatients() throws ClassNotFoundException, FileNotFoundException {
         ArrayList<Patient> patients = new ArrayList<>();
         ObjectInputStream is = null;
@@ -191,7 +228,7 @@ public class ServerThreadsClient implements Runnable {
             patients = patient_list.getPatients();
             System.out.println(patients);
 
-        }  catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
@@ -203,6 +240,34 @@ public class ServerThreadsClient implements Runnable {
             }
         }
         return patients;
+    }
+
+    private static void removePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
+        ArrayList<Patient> patients = getPatients();
+        // patients.remove;
+        String id = patientNew.getDNI();
+        Patient patientOld = searchPatientID(id);
+        patients.remove(patientOld);
+        patients.add(patientNew);
+        updatePatients(patients);
+
+    }
+
+    private static void updatePatients(ArrayList<Patient> patients) throws ClassNotFoundException {
+        try {
+
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(filename));
+            Patient_list patient_list = new Patient_list(patients);
+            os.writeObject(patient_list); //TODO how do we write only dni and passw? 2 different files?
+            System.out.println("All patients updated.");
+            os.close();
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     private static void sendPatientToClient(Patient patient) {
