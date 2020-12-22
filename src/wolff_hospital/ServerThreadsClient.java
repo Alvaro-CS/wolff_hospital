@@ -110,7 +110,17 @@ public class ServerThreadsClient implements Runnable {
                                 Patient p = (Patient) tmp;
 
                                 System.out.println("Patient received:" + p.getDNI());
-                                removePatient(p);
+                                replacePatient(p);
+                                break;
+                            }
+                            case "EXISTS": {
+                                System.out.println(instruction + " option running");
+
+                                tmp = objectInputStream.readObject();//we receive the name we want to check if its free from client
+                                String id = (String) tmp;
+
+                                System.out.println("ID received:" + id);
+                                Patient p=searchPatientID(id);
                                 break;
                             }
                             default: {
@@ -242,7 +252,7 @@ public class ServerThreadsClient implements Runnable {
         return patients;
     }
 
-    private static void removePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
+    private static void replacePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
         ArrayList<Patient> patients = getPatients();
         // patients.remove;
         String id = patientNew.getDNI();
