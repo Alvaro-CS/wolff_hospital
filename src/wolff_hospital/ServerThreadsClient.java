@@ -8,7 +8,6 @@ package wolff_hospital;
 import POJOS.Patient;
 import POJOS.Patient_list;
 import java.io.EOFException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -23,11 +22,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.fxml.FXML;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.layout.Pane;
 
 /**
  *
@@ -39,8 +33,7 @@ public class ServerThreadsClient implements Runnable {
     private int[] ecg_data;
     boolean open = true;
 
-    // private static ArrayList<Patient> patients = new ArrayList<>();
-    private static String filename = "./files/patientData";
+    private static final String filename = "./files/patientData";
 
     /**
      * Empty (default) constructor.
@@ -56,18 +49,22 @@ public class ServerThreadsClient implements Runnable {
     public void run() {
         try {
             serverSocket = new ServerSocket(9000);
-
             while (open) {
                 try {
                     System.out.println("Before accepting");
                     Socket socket = serverSocket.accept();
                     System.out.println("Client connected");
                     InputStream inputStream;
-                    ObjectInputStream objectInputStream = null;
+                    ObjectInputStream objectInputStream;
+                    OutputStream outputStream;
+                    ObjectOutputStream objectOutputStream;
 
                     try {
                         inputStream = socket.getInputStream();
                         objectInputStream = new ObjectInputStream(inputStream);
+                        outputStream = socket.getOutputStream();
+                        objectOutputStream = new ObjectOutputStream(outputStream);
+                        
                         Object tmp;
                         System.out.println("Before order");
                         //Instruction received
@@ -91,15 +88,9 @@ public class ServerThreadsClient implements Runnable {
                                 System.out.println(instruction + " option running");
 
                                 String[] data = new String[2];
-                                int i = 0;
-                                /*while ((tmp = objectInputStream.readObject()) != null) {//we receive the DNI+password combination
-                                    data[i] = (String) tmp;
-                                    System.out.println(data[i]);
-                                    i++;
-                                }*/
                                 data[0] = (String) objectInputStream.readObject();
                                 data[1] = (String) objectInputStream.readObject();
-                                searchPatient(data);
+                                searchPatient(data,objectOutputStream);
 
                                 break;
                             }
@@ -133,9 +124,7 @@ public class ServerThreadsClient implements Runnable {
                         Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
 
                         System.out.println("Client closed");
-                    } finally {
-                        releaseResourcesClient(objectInputStream, socket);
-                    }
+                    } 
 
                 } catch (IOException ex) {
                     Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -171,7 +160,7 @@ public class ServerThreadsClient implements Runnable {
 
     }
 
-    private static void searchPatient(String[] data) {
+    private static void searchPatient(String[] data,ObjectOutputStream objectOutputStream) {
         Patient patient = null;
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
@@ -187,16 +176,14 @@ public class ServerThreadsClient implements Runnable {
             }
             is.close();
             //Send patient object to client
-            sendPatientToClient(patient);
+            sendPatientToClient(patient,objectOutputStream);
 
         } catch (EOFException ex) {
             System.out.println("All data have been correctly read.");
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -254,7 +241,6 @@ public class ServerThreadsClient implements Runnable {
 
     private static void replacePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
         ArrayList<Patient> patients = getPatients();
-        // patients.remove;
         String id = patientNew.getDNI();
         Patient patientOld = searchPatientID(id);
         patients.remove(patientOld);
@@ -280,15 +266,9 @@ public class ServerThreadsClient implements Runnable {
 
     }
 
-    private static void sendPatientToClient(Patient patient) {
-        OutputStream outputStream = null;
-        ObjectOutputStream objectOutputStream = null;
-        Socket socket = null;
-        try {
-            socket = new Socket("localhost", 9001);
-            outputStream = socket.getOutputStream();
-            objectOutputStream = new ObjectOutputStream(outputStream);
+    private static void sendPatientToClient(Patient patient,ObjectOutputStream objectOutputStream) {
 
+        try {
             //Sending order
             String order = "RECEIVE_PATIENT";
             objectOutputStream.writeObject(order);
@@ -301,12 +281,9 @@ public class ServerThreadsClient implements Runnable {
         } catch (IOException ex) {
             System.out.println("Unable to write the object on the server.");
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            releaseResources(outputStream, socket);
-
-        }
+        } 
     }
-
+/*
     private static void releaseResources(OutputStream outputStream, Socket socket) {
         try {
             outputStream.close();
@@ -333,7 +310,7 @@ public class ServerThreadsClient implements Runnable {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+*/
     /**
      * Method that closes the serversocket and exits the thread, thus the
      * server.

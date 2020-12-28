@@ -5,16 +5,12 @@
  */
 package wolff_hospital;
 
-import java.io.EOFException;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,22 +28,21 @@ public class FXMLServerController implements Initializable {
 
     @FXML
     private Label label1;
-   // ServerSocket serverSocket = null;
     private boolean open = false;
     private ServerThreadsClient serverThreadsClient; //we create a reference for accesing different methods
-    
+
     /**
-     *This method creates the server thread. It will start waiting for clients.
+     * This method creates the server thread. It will start waiting for clients.
      */
     @FXML
     private void handleOpenServer(ActionEvent event) {
         if (!open) {
-                label1.setText("Server opened!");
-                open = true;
-                //We execute a thread that will wait for clients, so UI continous working.
-                serverThreadsClient= new ServerThreadsClient();
-                new Thread(serverThreadsClient).start();
-             
+            label1.setText("Server opened!");
+            open = true;
+            //We execute a thread that will wait for clients, so UI continous working.
+            serverThreadsClient = new ServerThreadsClient();
+            new Thread(serverThreadsClient).start();
+
         } else {
             label1.setText("Server is already opened!");
 
@@ -66,16 +61,17 @@ public class FXMLServerController implements Initializable {
         } catch (IOException ex) {
         }
     }
+
     /**
-     *This method closes the server thread.
+     * This method closes the server thread.
      */
     @FXML
     private void handleCloseServer(ActionEvent event) {
         if (open) {
             label1.setText("Server closed!");
-                serverThreadsClient.closeServer();
-                open = false;
-             
+            serverThreadsClient.closeServer();
+            open = false;
+
         } else {
             label1.setText("Server is already closed!");
 
@@ -85,12 +81,12 @@ public class FXMLServerController implements Initializable {
     Pane ECGpane;
 
     /**
-     *This method gets the data received by the server (int[]) and shows it in
+     * This method gets the data received by the server (int[]) and shows it in
      * the server, inside a pane.
      */
     @FXML
     public void showECG() {
-        int[] ECG_data=serverThreadsClient.getEcg_data();
+        int[] ECG_data = serverThreadsClient.getEcg_data();
         XYChart.Series series = new XYChart.Series();
 
         //populating the series with data
@@ -121,10 +117,10 @@ public class FXMLServerController implements Initializable {
         ECGpane.getChildren().add(lineChart);
         System.out.println("Shown");
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+
     }
 
 }
