@@ -112,6 +112,7 @@ public class ServerThreadsClient implements Runnable {
 
                                 System.out.println("ID received:" + id);
                                 Patient p=searchPatientID(id);
+                                sendPatientToClient(p, objectOutputStream);
                                 break;
                             }
                             default: {
@@ -279,7 +280,7 @@ public class ServerThreadsClient implements Runnable {
             System.out.println("Patient data sent to client");
 
         } catch (IOException ex) {
-            System.out.println("Unable to write the object on the server.");
+            System.out.println("Unable to write the object on the client.");
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         } 
     }
