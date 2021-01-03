@@ -13,7 +13,7 @@
             <Font name="Georgia Bold" size="18.0" />
          </font>
       </Label>
-      <Label fx:id="errorLabel" layoutX="180.0" layoutY="168.0" textFill="RED">
+      <Label fx:id="errorLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="66.0" layoutY="171.0" prefHeight="18.0" prefWidth="253.0" textAlignment="CENTER" textFill="RED">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

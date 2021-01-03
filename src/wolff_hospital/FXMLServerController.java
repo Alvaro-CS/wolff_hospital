@@ -14,12 +14,7 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
-
 /**
  *
  * @author ALVARO
@@ -49,18 +44,6 @@ public class FXMLServerController implements Initializable {
         }
     }
 
-    private static void releaseResources(InputStream inputStream, Socket socket) {
-
-        try {
-            inputStream.close();
-        } catch (IOException ex) {
-        }
-
-        try {
-            socket.close();
-        } catch (IOException ex) {
-        }
-    }
 
     /**
      * This method closes the server thread.
