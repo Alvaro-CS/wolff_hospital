@@ -77,46 +77,6 @@ public class FXMLServerController implements Initializable {
 
         }
     }
-    @FXML
-    Pane ECGpane;
-
-    /**
-     * This method gets the data received by the server (int[]) and shows it in
-     * the server, inside a pane.
-     */
-    @FXML
-    public void showECG() {
-        int[] ECG_data = serverThreadsClient.getEcg_data();
-        XYChart.Series series = new XYChart.Series();
-
-        //populating the series with data
-        int min = Integer.MAX_VALUE;
-        int max = 0;
-        for (int i = 0; i < ECG_data.length; i++) {
-            series.getData().add(new XYChart.Data(i, ECG_data[i]));
-            if (min > ECG_data[i]) {
-                min = ECG_data[i];
-            }
-            if (max < ECG_data[i]) {
-                max = ECG_data[i];
-            }
-        }
-        ECGpane.getChildren().clear();
-
-        final NumberAxis xAxis = new NumberAxis(0, ECG_data.length, 1);
-        final NumberAxis yAxis = new NumberAxis(min - 5, max + 5, 0.1);//lower, upper, tick
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-
-        lineChart.getXAxis().setLabel("Time");
-        lineChart.getYAxis().setLabel("Amplitude");
-
-        //creating the chart
-        lineChart.setTitle("ECG");
-        //defining a series
-        lineChart.getData().add(series);
-        ECGpane.getChildren().add(lineChart);
-        System.out.println("Shown");
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

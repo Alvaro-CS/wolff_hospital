@@ -49,90 +49,79 @@ public class ServerThreadsClient implements Runnable {
     public void run() {
         try {
             serverSocket = new ServerSocket(9000);
+            System.out.println("Before accepting");
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected");
+            InputStream inputStream = socket.getInputStream();
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            OutputStream outputStream = socket.getOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             while (open) {
                 try {
-                    System.out.println("Before accepting");
-                    Socket socket = serverSocket.accept();
-                    System.out.println("Client connected");
-                    InputStream inputStream;
-                    ObjectInputStream objectInputStream;
-                    OutputStream outputStream;
-                    ObjectOutputStream objectOutputStream;
+                    Object tmp;
+                    System.out.println("Before order");
+                    //Instruction received
+                    String instruction;
+                    tmp = objectInputStream.readObject();//we receive the instruction
+                    instruction = (String) tmp;
 
-                    try {
-                        inputStream = socket.getInputStream();
-                        objectInputStream = new ObjectInputStream(inputStream);
-                        outputStream = socket.getOutputStream();
-                        objectOutputStream = new ObjectOutputStream(outputStream);
-                        
-                        Object tmp;
-                        System.out.println("Before order");
-                        //Instruction received
-                        String instruction;
-                        tmp = objectInputStream.readObject();//we receive the instruction
-                        instruction = (String) tmp;
+                    System.out.println("Order received");
+                    switch (instruction) {
+                        case "REGISTER": {
+                            System.out.println(instruction + " option running");
 
-                        System.out.println("Order received");
-                        switch (instruction) {
-                            case "REGISTER": {
-                                System.out.println(instruction + " option running");
+                            tmp = objectInputStream.readObject();//we receive the new patient from client
+                            Patient p = (Patient) tmp;
 
-                                tmp = objectInputStream.readObject();//we receive the new patient from client
-                                Patient p = (Patient) tmp;
-
-                                System.out.println("Patient received:" + p.getDNI());
-                                registerPatient(p);
-                                break;
-                            }
-                            case "SEARCH_PATIENT": {
-                                System.out.println(instruction + " option running");
-
-                                String[] data = new String[2];
-                                data[0] = (String) objectInputStream.readObject();
-                                data[1] = (String) objectInputStream.readObject();
-                                searchPatient(data,objectOutputStream);
-
-                                break;
-                            }
-                            case "UPDATE": {
-                                System.out.println(instruction + " option running");
-
-                                tmp = objectInputStream.readObject();//we receive the new patient from client
-                                Patient p = (Patient) tmp;
-
-                                System.out.println("Patient received:" + p.getDNI());
-                                replacePatient(p);
-                                break;
-                            }
-                            case "EXISTS": {
-                                System.out.println(instruction + " option running");
-
-                                tmp = objectInputStream.readObject();//we receive the name we want to check if its free from client
-                                String id = (String) tmp;
-
-                                System.out.println("ID received:" + id);
-                                Patient p=searchPatientID(id);
-                                sendPatientToClient(p, objectOutputStream);
-                                break;
-                            }
-                            default: {
-                                System.out.println("Error");
-                                break;
-                            }
+                            System.out.println("Patient received:" + p.getDNI());
+                            registerPatient(p);
+                            break;
                         }
+                        case "SEARCH_PATIENT": {
+                            System.out.println(instruction + " option running");
 
-                    } catch (IOException | ClassNotFoundException e) {
-                        Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
+                            String[] data = new String[2];
+                            data[0] = (String) objectInputStream.readObject();
+                            data[1] = (String) objectInputStream.readObject();
+                            searchPatient(data, objectOutputStream);
 
-                        System.out.println("Client closed");
-                    } 
+                            break;
+                        }
+                        case "UPDATE": {
+                            System.out.println(instruction + " option running");
 
-                } catch (IOException ex) {
-                    Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+                            tmp = objectInputStream.readObject();//we receive the new patient from client
+                            Patient p = (Patient) tmp;
+
+                            System.out.println("Patient received:" + p.getDNI());
+                            replacePatient(p);
+                            break;
+                        }
+                        case "EXISTS": {
+                            System.out.println(instruction + " option running");
+
+                            tmp = objectInputStream.readObject();//we receive the name we want to check if its free from client
+                            String id = (String) tmp;
+
+                            System.out.println("ID received:" + id);
+                            Patient p = searchPatientID(id);
+                            sendPatientToClient(p, objectOutputStream);
+                            break;
+                        }
+                        default: {
+                            System.out.println("Error");
+                            break;
+                        }
+                    }
+
+                } catch (IOException | ClassNotFoundException e) {
+                    Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
+
+                    System.out.println("Client closed");
+
                 }
-            }
-            // if(!open)                        {releaseResourcesClient(objectInputStream, socket);}
 
+            }
         } catch (IOException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -161,7 +150,7 @@ public class ServerThreadsClient implements Runnable {
 
     }
 
-    private static void searchPatient(String[] data,ObjectOutputStream objectOutputStream) {
+    private static void searchPatient(String[] data, ObjectOutputStream objectOutputStream) {
         Patient patient = null;
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
@@ -177,7 +166,7 @@ public class ServerThreadsClient implements Runnable {
             }
             is.close();
             //Send patient object to client
-            sendPatientToClient(patient,objectOutputStream);
+            sendPatientToClient(patient, objectOutputStream);
 
         } catch (EOFException ex) {
             System.out.println("All data have been correctly read.");
@@ -213,7 +202,7 @@ public class ServerThreadsClient implements Runnable {
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return patient;
+        return patient; //if not found, it will be null
     }
 
     private static ArrayList<Patient> getPatients() throws ClassNotFoundException, FileNotFoundException {
@@ -267,7 +256,7 @@ public class ServerThreadsClient implements Runnable {
 
     }
 
-    private static void sendPatientToClient(Patient patient,ObjectOutputStream objectOutputStream) {
+    private static void sendPatientToClient(Patient patient, ObjectOutputStream objectOutputStream) {
 
         try {
             //Sending order
@@ -282,9 +271,10 @@ public class ServerThreadsClient implements Runnable {
         } catch (IOException ex) {
             System.out.println("Unable to write the object on the client.");
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
-/*
+
+    /*
     private static void releaseResources(OutputStream outputStream, Socket socket) {
         try {
             outputStream.close();
@@ -311,7 +301,7 @@ public class ServerThreadsClient implements Runnable {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-*/
+     */
     /**
      * Method that closes the serversocket and exits the thread, thus the
      * server.
