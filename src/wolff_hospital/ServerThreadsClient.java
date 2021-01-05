@@ -22,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -114,7 +115,7 @@ public class ServerThreadsClient implements Runnable {
                                 break;
                             }
                             case "GET_PATIENTS": {
-                                ArrayList<Patient> patients=getPatients();
+                                ArrayList<Patient> patients = getPatients();
                                 sendPatientListToClient(patients, objectOutputStream);
                                 break;
                             }
@@ -190,7 +191,7 @@ public class ServerThreadsClient implements Runnable {
         }
     }
 
-    //Return patient for update (use)
+    //To check if patient exists (register)
     private static Patient searchPatientID(String id) {
         Patient patient = null;
         try {
@@ -243,10 +244,23 @@ public class ServerThreadsClient implements Runnable {
 
     private static void replacePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
         ArrayList<Patient> patients = getPatients();
+        System.out.println("Antes" + patients.size());
         String id = patientNew.getDNI();
-        Patient patientOld = searchPatientID(id);
-        patients.remove(patientOld);
-        patients.add(patientNew);
+
+        int index=0;
+        //removing "old" patient
+        for (int i = 0; i < patients.size(); i++) {
+            if (patients.get(i).getDNI().equals(id)) {
+                index = i;
+                patients.remove(patients.get(i));
+            }
+        }
+
+        System.out.println("Quitamos" + patients.size());
+
+        patients.add(index,patientNew);
+        System.out.println("Actualizamos" + patients.size());
+
         updatePatients(patients);
 
     }
@@ -285,6 +299,7 @@ public class ServerThreadsClient implements Runnable {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     private static void sendPatientListToClient(ArrayList<Patient> patients, ObjectOutputStream objectOutputStream) {
 
         try {
