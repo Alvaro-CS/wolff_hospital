@@ -30,7 +30,7 @@ public class FXMLServerPassController implements Initializable {
     @FXML
     private PasswordField passwordField;
     
-    private final String password="TELEMEDICINERULES";
+    private final String password="server";
     
     /**
      *This method logins the patient

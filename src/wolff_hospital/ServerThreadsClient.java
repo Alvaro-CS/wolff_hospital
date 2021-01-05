@@ -17,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import static java.lang.System.exit;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -110,6 +111,11 @@ public class ServerThreadsClient implements Runnable {
                                 System.out.println("ID received:" + id);
                                 Patient p = searchPatientID(id);
                                 sendPatientToClient(p, objectOutputStream);
+                                break;
+                            }
+                            case "GET_PATIENTS": {
+                                ArrayList<Patient> patients=getPatients();
+                                sendPatientListToClient(patients, objectOutputStream);
                                 break;
                             }
                             default: {
@@ -273,6 +279,23 @@ public class ServerThreadsClient implements Runnable {
             //Sending patient
             objectOutputStream.writeObject(patient);
             System.out.println("Patient data sent to client");
+
+        } catch (IOException ex) {
+            System.out.println("Unable to write the object on the client.");
+            Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    private static void sendPatientListToClient(ArrayList<Patient> patients, ObjectOutputStream objectOutputStream) {
+
+        try {
+            //Sending order
+            String order = "RECEIVE_PATIENT_LIST";
+            objectOutputStream.writeObject(order);
+            System.out.println("Order" + order + "sent");
+
+            //Sending patient
+            objectOutputStream.writeObject(patients);
+            System.out.println("ALL patients data sent to client");
 
         } catch (IOException ex) {
             System.out.println("Unable to write the object on the client.");
