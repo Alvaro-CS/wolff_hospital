@@ -16,13 +16,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import static java.lang.System.exit;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,17 +27,19 @@ import java.util.logging.Logger;
  */
 public class ServerThreadsClient implements Runnable {
 
-    ServerSocket serverSocket;
+    Socket socket;
     private int[] ecg_data;
-    boolean open = true;
-    boolean client_connected = false;
+    private boolean client_connected = true;
 
     private static final String FILENAME = "./files/patientData";
 
     /**
-     * Empty (default) constructor.
+     * We create this thread for this specific socket/client.
+     *
+     * @param socket
      */
-    public ServerThreadsClient() {
+    public ServerThreadsClient(Socket socket) {
+        this.socket = socket;
     }
 
     /**
@@ -52,30 +49,25 @@ public class ServerThreadsClient implements Runnable {
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(9000);
-            while (open) {//For each client that can connect
-                System.out.println("Before accepting");
-                Socket socket = serverSocket.accept();
-                System.out.println("Client connected");
-                client_connected = true;
-                InputStream inputStream = socket.getInputStream();
-                ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-                OutputStream outputStream = socket.getOutputStream();
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-                while (client_connected) {
-                    try {
-                        Object tmp;
-                        System.out.println("Before order");
-                        //Instruction received
-                        String instruction;
-                        tmp = objectInputStream.readObject();//we receive the instruction
+            InputStream inputStream = socket.getInputStream();
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            OutputStream outputStream = socket.getOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            System.out.println("Antes");
+            while (client_connected) {
+                System.out.println("Dentro");
+                try {
+                    Object tmp;
+                    System.out.println("Before order");
+                    //Instruction received
+                    String instruction;
+                    tmp = objectInputStream.readObject();//we receive the instruction
+                    if (FXMLServerController.open) {
                         instruction = (String) tmp;
-
                         System.out.println("Order received");
                         switch (instruction) {
                             case "REGISTER": {
                                 System.out.println(instruction + " option running");
-
                                 tmp = objectInputStream.readObject();//we receive the new patient from client
                                 Patient p = (Patient) tmp;
 
@@ -95,7 +87,6 @@ public class ServerThreadsClient implements Runnable {
                             }
                             case "UPDATE": {
                                 System.out.println(instruction + " option running");
-
                                 tmp = objectInputStream.readObject();//we receive the new patient from client
                                 Patient p = (Patient) tmp;
 
@@ -124,16 +115,17 @@ public class ServerThreadsClient implements Runnable {
                                 break;
                             }
                         }
-
-                    } catch (IOException | ClassNotFoundException e) {
-                        Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
-                        System.out.println("Client closed");
-                        client_connected = false;
-                        releaseResources(socket, outputStream, objectOutputStream, inputStream, objectInputStream);
+                    } else {//If server closes, stop instruction flow.
+                        System.out.println("Server closed");
+                        break;
                     }
+                } catch (EOFException | ClassNotFoundException e) {
+                    Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, e);
+                    System.out.println("Client closed");
+                    client_connected = false;
+                    releaseResources(socket, outputStream, objectOutputStream, inputStream, objectInputStream);
                 }
             }
-
         } catch (IOException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -245,12 +237,14 @@ public class ServerThreadsClient implements Runnable {
     private static void replacePatient(Patient patientNew) throws ClassNotFoundException, FileNotFoundException {
         ArrayList<Patient> patients = getPatients();
         System.out.println("Antes" + patients.size());
-        String id = patientNew.getDNI();
+        System.out.println("Nº records NEW: " + patientNew.getClinical_record_list().size());
 
-        int index=0;
+        String id = patientNew.getDNI();
+        int index = 0;
         //removing "old" patient
         for (int i = 0; i < patients.size(); i++) {
             if (patients.get(i).getDNI().equals(id)) {
+                System.out.println("Nº records OLD: " + patients.get(i).getClinical_record_list().size());
                 index = i;
                 patients.remove(patients.get(i));
             }
@@ -258,9 +252,10 @@ public class ServerThreadsClient implements Runnable {
 
         System.out.println("Quitamos" + patients.size());
 
-        patients.add(index,patientNew);
-        System.out.println("Actualizamos" + patients.size());
+        patients.add(index, patientNew);
+        System.out.println("Nº records actualizado: " + patients.get(index).getClinical_record_list().size());
 
+        System.out.println("Actualizamos" + patients.size());
         updatePatients(patients);
 
     }
@@ -345,21 +340,6 @@ public class ServerThreadsClient implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(ServerThreadsClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    /**
-     * Method that closes the serversocket and exits the thread, thus the
-     * server.
-     */
-    public void closeServer() {
-        try {
-            open = false;
-            serverSocket.close();
-            System.out.println("Server closed.");
-        } catch (IOException ex) {
-            Logger.getLogger(FXMLServerController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }
 
     /**

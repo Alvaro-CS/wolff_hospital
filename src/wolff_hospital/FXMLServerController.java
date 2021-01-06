@@ -23,8 +23,8 @@ public class FXMLServerController implements Initializable {
 
     @FXML
     private Label label1;
-    private boolean open = false;
-    private ServerThreadsClient serverThreadsClient; //we create a reference for accesing different methods
+    public static volatile boolean open = false;
+    private ServerThreadUI serverThreadUI; //we create a reference for accesing different methods
 
     /**
      * This method creates the server thread. It will start waiting for clients.
@@ -35,8 +35,8 @@ public class FXMLServerController implements Initializable {
             label1.setText("Server opened!");
             open = true;
             //We execute a thread that will wait for clients, so UI continous working.
-            serverThreadsClient = new ServerThreadsClient();
-            new Thread(serverThreadsClient).start();
+            serverThreadUI = new ServerThreadUI();
+            new Thread(serverThreadUI).start();
 
         } else {
             label1.setText("Server is already opened!");
@@ -52,7 +52,7 @@ public class FXMLServerController implements Initializable {
     private void handleCloseServer(ActionEvent event) {
         if (open) {
             label1.setText("Server closed!");
-            serverThreadsClient.closeServer();
+            serverThreadUI.closeServer();
             open = false;
 
         } else {
