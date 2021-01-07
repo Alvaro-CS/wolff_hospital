@@ -8,6 +8,7 @@ package wolff_hospital;
 import POJOS.Patient;
 import POJOS.Patient_list;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -141,6 +142,17 @@ public class ServerThreadsClient implements Runnable {
             System.out.println(p + " added.");
             System.out.println("Updated patients:\n" + patients);
             Patient_list patient_list = new Patient_list(patients);
+            File directory = new File("./files/");
+
+            if (directory.exists()) {
+                System.out.println("File is a Directory");
+            } else {
+                System.out.println("Directory doesn't exist!!");
+                directory.mkdirs();
+                System.out.println("directory created");
+
+            }
+
             ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(FILENAME));
 
             os.writeObject(patient_list); //TODO how do we write only dni and passw? 2 different files?
