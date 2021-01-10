@@ -5,10 +5,6 @@
  */
 package wolff_hospital;
 
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -39,6 +35,7 @@ public class FXMLServerController implements Initializable {
             new Thread(serverThreadUI).start();
 
         } else {
+            label1.centerShapeProperty();
             label1.setText("Server is already opened!");
 
         }

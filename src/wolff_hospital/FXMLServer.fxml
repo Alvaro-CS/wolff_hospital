@@ -3,17 +3,22 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane id="AnchorPane" prefHeight="181.0" prefWidth="387.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wolff_hospital.FXMLServerController">
     <children>
-        <Button fx:id="button" layoutX="56.0" layoutY="87.0" onAction="#handleOpenServer" text="Open server" />
-        <Label fx:id="label1" layoutX="169.0" layoutY="131.0" minHeight="16" minWidth="69" />
-      <Button fx:id="button1" layoutX="284.0" layoutY="87.0" onAction="#handleCloseServer" text="Close server" />
-      <Label layoutX="30.0" layoutY="32.0" text="Welcome back hospital server admin!">
-         <font>
-            <Font name="Georgia Bold" size="18.0" />
-         </font>
-      </Label>
+        <Button fx:id="button" layoutX="61.0" layoutY="99.0" onAction="#handleOpenServer" text="Open server" AnchorPane.leftAnchor="61.0" />
+        <Label fx:id="label1" layoutX="152.0" layoutY="137.0" minHeight="16" minWidth="69" prefHeight="21.0" prefWidth="134.0" />
+      <Button fx:id="button1" layoutX="246.0" layoutY="99.0" onAction="#handleCloseServer" text="Close server" AnchorPane.rightAnchor="61.0" />
+      <Pane layoutX="-7.0" layoutY="1.0" prefHeight="62.0" prefWidth="393.0" style="-fx-background-color: #E3E4E5;">
+         <children>
+            <Label layoutX="22.0" layoutY="21.0" text="Welcome back hospital server admin!">
+               <font>
+                  <Font name="Georgia Bold" size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
     </children>
 </AnchorPane>

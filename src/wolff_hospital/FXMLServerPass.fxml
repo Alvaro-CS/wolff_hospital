@@ -4,21 +4,26 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane id="AnchorPane" prefHeight="200" prefWidth="387.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wolff_hospital.FXMLServerPassController">
     <children>
-      <Label layoutX="47.0" layoutY="23.0" prefHeight="45.0" prefWidth="314.0" text="Welcome to the server!&#10;Please insert ADMIN password" textAlignment="CENTER">
-         <font>
-            <Font name="Georgia Bold" size="18.0" />
-         </font>
-      </Label>
       <Label fx:id="errorLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="66.0" layoutY="171.0" prefHeight="18.0" prefWidth="253.0" textAlignment="CENTER" textFill="RED">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
       <Button layoutX="167.0" layoutY="135.0" mnemonicParsing="false" onAction="#enterButtonOnAction" text="ENTER" />
-      <PasswordField fx:id="passwordField" layoutX="118.0" layoutY="87.0" promptText="Password" />
+      <PasswordField fx:id="passwordField" layoutX="118.0" layoutY="100.0" promptText="Password" />
+      <Pane prefHeight="81.0" prefWidth="387.0" style="-fx-background-color: #E3E4E5;">
+         <children>
+            <Label layoutX="49.0" layoutY="18.0" prefHeight="45.0" prefWidth="289.0" text="Welcome to the server!&#10;Please insert ADMIN password" textAlignment="CENTER">
+               <font>
+                  <Font name="Georgia Bold" size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
     </children>
 </AnchorPane>
