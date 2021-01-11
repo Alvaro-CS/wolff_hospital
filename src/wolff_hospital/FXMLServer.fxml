@@ -9,7 +9,7 @@
 <AnchorPane id="AnchorPane" prefHeight="181.0" prefWidth="387.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wolff_hospital.FXMLServerController">
     <children>
         <Button fx:id="button" layoutX="61.0" layoutY="99.0" onAction="#handleOpenServer" text="Open server" AnchorPane.leftAnchor="61.0" />
-        <Label fx:id="label1" layoutX="152.0" layoutY="137.0" minHeight="16" minWidth="69" prefHeight="21.0" prefWidth="134.0" />
+        <Label fx:id="label1" alignment="CENTER" contentDisplay="CENTER" layoutX="58.0" layoutY="137.0" minHeight="16" minWidth="69" prefHeight="22.0" prefWidth="269.0" textAlignment="CENTER" />
       <Button fx:id="button1" layoutX="246.0" layoutY="99.0" onAction="#handleCloseServer" text="Close server" AnchorPane.rightAnchor="61.0" />
       <Pane layoutX="-7.0" layoutY="1.0" prefHeight="62.0" prefWidth="393.0" style="-fx-background-color: #E3E4E5;">
          <children>
