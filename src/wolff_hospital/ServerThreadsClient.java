@@ -54,18 +54,22 @@ public class ServerThreadsClient implements Runnable {
             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
             OutputStream outputStream = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            System.out.println("Antes");
             while (client_connected) {
-                System.out.println("Dentro");
                 try {
+                    //We first send a 1 to the client to check if connections are working.
+                    //If client doesn't receive the 1, but a -1, server would be offline.
+                    // objectOutputStream.writeByte(1);
+                    //objectOutputStream.flush();
+
                     Object tmp;
                     System.out.println("Before order");
                     //Instruction received
                     String instruction;
-                    tmp = objectInputStream.readObject();//we receive the instruction
-                    if (FXMLServerController.open) {
+                    tmp = objectInputStream.readObject();//we receive the instruction.                 
+                    if (FXMLServerController.open) {//if server is open
                         instruction = (String) tmp;
                         System.out.println("Order received");
+
                         switch (instruction) {
                             case "REGISTER": {
                                 System.out.println(instruction + " option running");
@@ -87,6 +91,11 @@ public class ServerThreadsClient implements Runnable {
                                 break;
                             }
                             case "UPDATE": {
+                                //Now, double check for the client to check if connections
+                                //are working (otherwise, client can perform at least 1 action without response).
+                                objectOutputStream.writeByte(1);
+                                objectOutputStream.flush();
+                                
                                 System.out.println(instruction + " option running");
                                 tmp = objectInputStream.readObject();//we receive the new patient from client
                                 Patient p = (Patient) tmp;
