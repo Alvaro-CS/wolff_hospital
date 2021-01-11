@@ -58,7 +58,7 @@ public class ServerThreadsClient implements Runnable {
                 try {
                     //We first send a 1 to the client to check if connections are working.
                     //If client doesn't receive the 1, but a -1, server would be offline.
-                   // objectOutputStream.writeByte(1);
+                    // objectOutputStream.writeByte(1);
                     //objectOutputStream.flush();
 
                     Object tmp;
@@ -69,10 +69,6 @@ public class ServerThreadsClient implements Runnable {
                     if (FXMLServerController.open) {//if server is open
                         instruction = (String) tmp;
                         System.out.println("Order received");
-                        //Now, double check for the client to check if connections
-                        //are working (otherwise, client can perform at least 1 action without response).
-                        objectOutputStream.writeByte(1);
-                        objectOutputStream.flush();
 
                         switch (instruction) {
                             case "REGISTER": {
@@ -95,6 +91,11 @@ public class ServerThreadsClient implements Runnable {
                                 break;
                             }
                             case "UPDATE": {
+                                //Now, double check for the client to check if connections
+                                //are working (otherwise, client can perform at least 1 action without response).
+                                objectOutputStream.writeByte(1);
+                                objectOutputStream.flush();
+                                
                                 System.out.println(instruction + " option running");
                                 tmp = objectInputStream.readObject();//we receive the new patient from client
                                 Patient p = (Patient) tmp;
