@@ -1,4 +1,4 @@
-# wolff_hospital
+# SERVER API for WOLFFGRAM: wolff_hospital
 Created by Susana del Riego, Álvaro Cascajero and Alejandra Aceves
 
 This project works together with wolff_patient and wolff_doctor (clients). Read their manual for more info.
