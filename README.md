@@ -19,5 +19,3 @@ If the user wants to close the server, he just must click on the Close Server bu
 In the case that the user forgets to close the server, before pressing the X close button of the window, the server will be automatically closed.
 
 Also, if the user wants to close the server and then open again the server, it will be also possible.
-
-With the Server being open, we can run the clients app. We will start explaining the patient app, **wolff\_patient**.
